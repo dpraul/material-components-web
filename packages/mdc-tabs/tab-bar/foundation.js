@@ -142,10 +142,6 @@ export default class MDCTabBarFoundation extends MDCFoundation {
   }
 
   switchToTabAtIndex(index, shouldNotify) {
-    if (index === this.activeTabIndex_) {
-      return;
-    }
-
     if (index < 0 || index >= this.adapter_.getNumberOfTabs()) {
       throw new Error(`Out of bounds index specified for tab: ${index}`);
     }
@@ -153,7 +149,7 @@ export default class MDCTabBarFoundation extends MDCFoundation {
     const prevActiveTabIndex = this.activeTabIndex_;
     this.activeTabIndex_ = index;
     requestAnimationFrame(() => {
-      if (prevActiveTabIndex >= 0) {
+      if (prevActiveTabIndex >= 0 && prevActiveTabIndex !== this.activeTabIndex_) {
         this.adapter_.setTabActiveAtIndex(prevActiveTabIndex, false);
       }
       this.adapter_.setTabActiveAtIndex(this.activeTabIndex_, true);

@@ -15,6 +15,7 @@
  */
 
 import MDCComponent from '@material/base/component';
+import {MDCSimpleMenu} from '@material/menu';
 import {MDCRipple} from '@material/ripple';
 
 import {cssClasses} from './constants';
@@ -43,6 +44,10 @@ export class MDCTab extends MDCComponent {
     this.foundation_.setActive(isActive);
   }
 
+  get options() {
+    return this.menu_ ? this.menu_.items : [];
+  }
+
   get preventDefaultOnClick() {
     return this.foundation_.preventsDefaultOnClick();
   }
@@ -51,14 +56,23 @@ export class MDCTab extends MDCComponent {
     this.foundation_.setPreventDefaultOnClick(preventDefaultOnClick);
   }
 
-  constructor(...args) {
-    super(...args);
-
-    this.ripple_ = MDCRipple.attachTo(this.root_);
+  initialize(menuFactory = (el) => new MDCSimpleMenu(el)) {
+    this.menuEl_ = this.root_.querySelector('.mdc-tab__menu');
+    this.tabText_ = this.root_.querySelector('.mdc-tab__text');
+    if (this.menuEl_) {
+      this.menu_ = menuFactory(this.menuEl_);
+    } else {
+      this.ripple_ = MDCRipple.attachTo(this.root_);
+    }
   }
 
   destroy() {
-    this.ripple_.destroy();
+    if (this.ripple_) {
+      this.ripple_.destroy();
+    }
+    if (this.menu_) {
+      this.menu_.destroy();
+    }
     super.destroy();
   }
 
@@ -71,6 +85,22 @@ export class MDCTab extends MDCComponent {
       getOffsetWidth: () => this.root_.offsetWidth,
       getOffsetLeft: () => this.root_.offsetLeft,
       notifySelected: () => this.emit(MDCTabFoundation.strings.SELECTED_EVENT, {tab: this}, true),
+      setTextContent: (selectedTextContent) => {
+        if (this.tabText_) {
+          this.tabText_.textContent = selectedTextContent;
+        } else {
+          this.root_.textContent = selectedTextContent;
+        }
+      },
+      getTextContent: () => this.tabText_ ? this.tabText_.textContent : this.root_.textContent,
+      getNumberOfOptions: () => this.options.length,
+      getTextForOptionAtIndex: (index) => this.options[index].textContent,
+      getValueForOptionAtIndex: (index) => this.options[index].id || this.options[index].textContent,
+      hasMenu: () => this.menu_ !== undefined,
+      openMenu: (focusIndex) => this.menu_.show({focusIndex}),
+      isMenuOpen: () => this.menu_.open,
+      registerMenuInteractionHandler: (type, handler) => this.menu_.listen(type, handler),
+      deregisterMenuInteractionHandler: (type, handler) => this.menu_.unlisten(type, handler),
     });
   }
 

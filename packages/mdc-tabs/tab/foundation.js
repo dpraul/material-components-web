@@ -15,6 +15,7 @@
  */
 
 import MDCFoundation from '@material/base/foundation';
+import {MDCSimpleMenuFoundation} from '@material/menu';
 import {cssClasses, strings} from './constants';
 
 export default class MDCTabFoundation extends MDCFoundation {
@@ -45,12 +46,17 @@ export default class MDCTabFoundation extends MDCFoundation {
     this.computedLeft_ = 0;
     this.isActive_ = false;
     this.preventDefaultOnClick_ = false;
+    this.defaultText_ = this.adapter_.getTextContent();
 
     this.clickHandler_ = (evt) => {
       if (this.preventDefaultOnClick_) {
         evt.preventDefault();
       }
-      this.adapter_.notifySelected();
+      if (this.adapter_.hasMenu()) {
+        this.adapter_.openMenu();
+      } else {
+        this.adapter_.notifySelected();
+      }
     };
 
     this.keydownHandler_ = (evt) => {
@@ -58,16 +64,56 @@ export default class MDCTabFoundation extends MDCFoundation {
         this.adapter_.notifySelected();
       }
     };
+
+    this.selectionHandler_ = ({detail}) => {
+      const {index} = detail;
+
+      if (index !== this.selectedIndex_) {
+        this.setSelectedIndex(index);
+        this.adapter_.notifySelected();
+      }
+    };
+
+    this.cancelHandler_ = () => {};
   }
 
   init() {
     this.adapter_.registerInteractionHandler('click', this.clickHandler_);
     this.adapter_.registerInteractionHandler('keydown', this.keydownHandler_);
+
+    if (this.adapter_.hasMenu()) {
+      this.adapter_.registerMenuInteractionHandler(
+        MDCSimpleMenuFoundation.strings.SELECTED_EVENT, this.selectionHandler_);
+      this.adapter_.registerMenuInteractionHandler(
+        MDCSimpleMenuFoundation.strings.CANCEL_EVENT, this.cancelHandler_);
+    }
   }
 
   destroy() {
     this.adapter_.deregisterInteractionHandler('click', this.clickHandler_);
     this.adapter_.deregisterInteractionHandler('keydown', this.keydownHandler_);
+
+    if (this.adapter_.hasMenu()) {
+      this.adapter_.deregisterMenuInteractionHandler(
+        MDCSimpleMenuFoundation.strings.SELECTED_EVENT, this.selectionHandler_);
+      this.adapter_.deregisterMenuInteractionHandler(
+        MDCSimpleMenuFoundation.strings.CANCEL_EVENT, this.cancelHandler_);
+    }
+  }
+
+  setSelectedIndex(index) {
+    const newIndex = index >= 0 && index < this.adapter_.getNumberOfOptions() ? index : -1;
+    if (newIndex !== this.selectedIndex_) {
+      this.selectedIndex_ = newIndex;
+      let selectedTextContent;
+      if (this.selectedIndex_ >= 0) {
+        selectedTextContent = this.adapter_.getTextForOptionAtIndex(this.selectedIndex_).trim();
+      } else {
+        selectedTextContent = this.defaultText_;
+      }
+      this.adapter_.setTextContent(selectedTextContent);
+      this.measureSelf();
+    }
   }
 
   getComputedWidth() {
@@ -88,6 +134,7 @@ export default class MDCTabFoundation extends MDCFoundation {
       this.adapter_.addClass(cssClasses.ACTIVE);
     } else {
       this.adapter_.removeClass(cssClasses.ACTIVE);
+      this.setSelectedIndex(-1);
     }
   }
 

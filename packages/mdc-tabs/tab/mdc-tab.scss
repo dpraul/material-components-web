@@ -42,17 +42,30 @@ $mdc-tab-with-icon-and-text-height: 72px;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  overflow: hidden;
   vertical-align: middle;
 
   @include mdc-theme-prop(color, text-secondary-on-light);
 
-  &:hover {
-    @include mdc-theme-prop(color, text-primary-on-light);
+  &:not(&--more) {
+    overflow: hidden;
+
+    &:focus {
+      @include mdc-theme-prop(outline-color, text-secondary-on-light);
+    }
+
+    @include mdc-theme-dark(".mdc-tab-bar") {
+      &:focus {
+        @include mdc-theme-prop(outline-color, text-secondary-on-dark);
+      }
+    }
   }
 
-  &:focus {
-    @include mdc-theme-prop(outline-color, text-secondary-on-light);
+  &--more {
+    outline: none;
+  }
+
+  &:hover {
+    @include mdc-theme-prop(color, text-primary-on-light);
   }
 
   @include mdc-theme-dark(".mdc-tab-bar") {
@@ -60,10 +73,6 @@ $mdc-tab-with-icon-and-text-height: 72px;
 
     &:hover {
       @include mdc-theme-prop(color, text-primary-on-dark);
-    }
-
-    &:focus {
-      @include mdc-theme-prop(outline-color, text-secondary-on-dark);
     }
   }
 
@@ -92,6 +101,17 @@ $mdc-tab-with-icon-and-text-height: 72px;
   // postcss-bem-linter: ignore
   &__icon + &__icon-text {
     padding-top: 6px;
+  }
+
+  &__menu {
+    top: 0;
+    left: 0;
+    text-transform: none;
+    z-index: 4; // Should pop up above everything else. temporary-drawer is next highest at 3.
+  }
+
+  &__more-icon {
+    position: absolute;
   }
 }
 
