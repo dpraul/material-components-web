@@ -46,7 +46,6 @@ export default class MDCTabFoundation extends MDCFoundation {
     this.computedLeft_ = 0;
     this.isActive_ = false;
     this.preventDefaultOnClick_ = false;
-    this.defaultText_ = this.adapter_.getTextContent();
 
     this.clickHandler_ = (evt) => {
       if (this.preventDefaultOnClick_) {
@@ -81,6 +80,7 @@ export default class MDCTabFoundation extends MDCFoundation {
     this.adapter_.registerInteractionHandler('click', this.clickHandler_);
     this.adapter_.registerInteractionHandler('keydown', this.keydownHandler_);
 
+    this.defaultText_ = this.adapter_.getTextContent();
     if (this.adapter_.hasMenu()) {
       this.adapter_.registerMenuInteractionHandler(
         MDCSimpleMenuFoundation.strings.SELECTED_EVENT, this.selectionHandler_);
