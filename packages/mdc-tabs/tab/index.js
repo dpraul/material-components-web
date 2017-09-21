@@ -86,13 +86,11 @@ export class MDCTab extends MDCComponent {
       getOffsetLeft: () => this.root_.offsetLeft,
       notifySelected: () => this.emit(MDCTabFoundation.strings.SELECTED_EVENT, {tab: this}, true),
       setTextContent: (selectedTextContent) => {
-        if (this.tabText_) {
+        if (this.tabText_ && this.menu_) {
           this.tabText_.textContent = selectedTextContent;
-        } else {
-          this.root_.textContent = selectedTextContent;
         }
       },
-      getTextContent: () => this.tabText_ ? this.tabText_.textContent : this.root_.textContent,
+      getTextContent: () => this.tabText_ ? this.tabText_.textContent : '',
       getNumberOfOptions: () => this.options.length,
       getTextForOptionAtIndex: (index) => this.options[index].textContent,
       getValueForOptionAtIndex: (index) => this.options[index].id || this.options[index].textContent,
